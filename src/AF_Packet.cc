@@ -227,6 +227,14 @@ bool AF_PacketSource::ExtractNextPacket(Packet* pkt)
 
 		pkt->Init(props.link_type, &current_hdr.ts, current_hdr.caplen, current_hdr.len, data);
 
+#if ZEEK_VERSION_NUMBER >= 30200
+		if ( ( ( packet->tp_status & TP_STATUS_CSUM_VALID ) != 0 ) ||
+			 ( ( packet->tp_status & TP_STATUS_CSUMNOTREADY ) != 0 ) )
+			pkt->l3_checksummed = true;
+		else
+			pkt->l3_checksummed = false;
+#endif
+
 		if ( current_hdr.len == 0 || current_hdr.caplen == 0 )
 			{
 			Weird("empty_af_packet_header", pkt);
